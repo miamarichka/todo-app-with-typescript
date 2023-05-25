@@ -1,35 +1,153 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, {
+  useState, useMemo, useCallback,
+} from 'react';
+import { Footer } from './components/Footer';
+import { Main } from './components/Main';
+import { Header } from './components/Header';
+import { Todo } from './types/Todo';
+import { SelectOptions } from './types/SelectOptions';
+import { filterTodosBySelectOptions } from './utils/filterTodos';
+import { useLocalStorage } from './hooks/useLokalStorage';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App: React.FC = () => {
+  const [todos, setTodos] = useLocalStorage('todos', []);
+  const [completedTodosId, setCompletedTodosId] = useState<number[]>([]);
+
+  const [selectedOption, setSelectedOption]
+    = useState<SelectOptions>(SelectOptions.ALL);
+
+  const getCompletedTodosId = useCallback((allTodos: Todo[]) => () => {
+    return allTodos
+      .filter((todo: Todo) => todo.completed)
+      .map(todoItem => todoItem.id);
+  }, []);
+
+  const setOptionSelect = (type: SelectOptions) => {
+    setSelectedOption(type);
+  };
+
+  const visibleTodos = useMemo(() => {
+    setCompletedTodosId(getCompletedTodosId(todos));
+    if (Array.isArray(todos)) {
+      return filterTodosBySelectOptions(todos, selectedOption);
+    }
+
+    return [];
+  }, [getCompletedTodosId, todos, selectedOption]);
+
+  const addTodo = (todoToPost: Todo) => {
+    setTodos([...todos, todoToPost]);
+  };
+
+  const addComplitedTodo = (todoId:number) => {
+    const currentTodo = todos.find((todo:Todo) => todo.id === todoId);
+
+    if (currentTodo) {
+      if (!completedTodosId.includes(todoId)) {
+        setCompletedTodosId(prevState => ([...prevState, todoId]));
+      } else {
+        setCompletedTodosId(prevState => {
+          return prevState.filter(id => id !== todoId);
+        });
+      }
+    }
+  };
+
+  const patchTodoStatus = async (todoId: number) => {
+    const currentTodo = todos.find(todo => todo.id === todoId);
+
+    if (currentTodo) {
+      const newStatus = !currentTodo.completed;
+
+      currentTodo.completed = newStatus;
+      setTodos(todos.map((todo:Todo) => (
+        todo.id === todoId
+          ? currentTodo
+          : todo
+      )));
+    }
+  };
+
+  const updateTodoStatus = (todoId: number) => {
+    patchTodoStatus(todoId);
+  };
+
+  const deleteTodo = (todoId: number) => {
+    const todoToDelete = todos.find(todo => todo.id === todoId);
+
+    if (todoToDelete) {
+      const updatedTodos = todos.filter((todo: Todo) => todo.id !== todoId);
+
+      setTodos(updatedTodos);
+    }
+  };
+
+  const deleteCompletedTodos = () => {
+    const incomplitedTodos: Todo[] = todos.filter(
+      (todo: Todo) => !todo.completed,
+    );
+
+    setTodos(incomplitedTodos);
+  };
+
+  const isToggleAllActive = completedTodosId.length < 1
+    || completedTodosId.length === todos.length;
+
+  const onActiveToggle = () => {
+    if (isToggleAllActive) {
+      todos.map(todo => patchTodoStatus(todo.id));
+    }
+  };
+
+  const updateTodoTitle = (
+    todoId: number, newTitle: string,
+  ) => {
+    const currentTodo = todos.find(todo => todo.id === todoId);
+
+    if (currentTodo) {
+      currentTodo.title = newTitle;
+      setTodos(todos.map((todo:Todo) => (
+        todo.id === todoId
+          ? currentTodo
+          : todo
+      )));
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div className="todoapp">
+      <h1 className="todoapp__title">todos</h1>
 
-export default App
+      <div className="todoapp__content">
+        <Header
+          onAddTodo={addTodo}
+          isToggleAllActive={isToggleAllActive}
+          handleToggleClick={onActiveToggle}
+        />
+
+        {!!todos.length
+          && (
+            <Main
+              todos={visibleTodos}
+              addComplitedTodo={addComplitedTodo}
+              onTodoChangingStatus={updateTodoStatus}
+              onTodoDelete={deleteTodo}
+              onTodoChangingTitle={updateTodoTitle}
+            />
+          )}
+
+        {!!todos.length
+          && (
+            <Footer
+              filterTodos={setOptionSelect}
+              todosCount={todos.length}
+              completedTodosCount={completedTodosId.length}
+              deleteCompletedTodos={deleteCompletedTodos}
+            />
+          )}
+      </div>
+    </div>
+  );
+};
+
+export default App;
