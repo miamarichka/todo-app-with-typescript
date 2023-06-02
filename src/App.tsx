@@ -11,7 +11,6 @@ import { ErrorType } from './types/ErrorType';
 import {
   deleteTodos, getTodos, postTodos, patchTodoStatus, patchTodoTitle,
 } from './api/todos';
-import { USER_ID } from './utils/userId';
 import { filterTodosBySelectOptions } from './utils/filterTodos';
 
 const App: React.FC = () => {
@@ -54,7 +53,6 @@ const App: React.FC = () => {
   const emptyTodo = useCallback((title = '') => {
     const emptyNewTodo = {
       id: 0,
-      userId: USER_ID,
       title,
       completed: false,
     };
