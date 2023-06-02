@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useState } from 'react';
 import { Todo } from '../types/Todo';
+import { ModalOverlay } from './ModalOverlay';
 
 type Props = {
   todoInfo: Todo,
@@ -8,6 +9,7 @@ type Props = {
   onTodoDelete: (id: number) => void,
   onTodoChangingStatus: (todoId: number) => void,
   onTodoChangingTitle: (todoId: number, title:string) => void,
+  todoLoadingId: number[],
 };
 
 export const TodoInfo: React.FC<Props> = ({
@@ -16,6 +18,7 @@ export const TodoInfo: React.FC<Props> = ({
   onTodoDelete,
   onTodoChangingStatus,
   onTodoChangingTitle,
+  todoLoadingId,
 }) => {
   const [isTodoEditing, setIsTodoEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(todoInfo.title);
@@ -33,15 +36,16 @@ export const TodoInfo: React.FC<Props> = ({
   };
 
   const handleInputBlur = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
-    const trimmedTitle = target.value.trim();
+    if (target.value.trim() !== title) {
+      setNewTitle(target.value.trim());
+    }
 
-    if (trimmedTitle === '') {
+    if (target.value.trim() === '') {
       onTodoDelete(id);
-    } else if (trimmedTitle !== title) {
-      setNewTitle(trimmedTitle);
     }
 
     setIsTodoEditing(false);
+    setNewTitle(target.value.trim());
   };
 
   const onKeyUp = (e: React.KeyboardEvent) => {
@@ -53,15 +57,11 @@ export const TodoInfo: React.FC<Props> = ({
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (newTitle.trim() === '') {
-      onTodoDelete(id);
-
-      return;
-    }
-
-    onTodoChangingTitle(id, newTitle.trim());
+    onTodoChangingTitle(id, newTitle);
     setIsTodoEditing(false);
   };
+
+  const isTodoLoading = id === 0 || todoLoadingId.includes(id);
 
   return (
     <div className={`todo ${completed ? 'completed' : ''}`}>
@@ -108,6 +108,10 @@ export const TodoInfo: React.FC<Props> = ({
           </button>
         </>
       )}
+      <ModalOverlay
+        isTodoLoading={isTodoLoading}
+      />
+
     </div>
   );
 };
