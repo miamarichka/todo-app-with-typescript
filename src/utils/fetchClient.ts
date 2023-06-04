@@ -27,7 +27,6 @@ function request<T>(
   return wait(300)
     .then(() => fetch(BASE_URL + url, options))
     .then(response => {
-      console.log(url)
       if (!response.ok) {
         throw new Error();
       }
