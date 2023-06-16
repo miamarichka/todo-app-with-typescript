@@ -5,11 +5,11 @@ import { TempTodo } from './TempTodo';
 
 type Props = {
   todos: Todo[],
-  addComplitedTodo: (todoId:number) => void,
-  onTodoDelete: (id: number) => void,
-  onTodoChangingStatus: (todoId: number) => void,
-  onTodoChangingTitle: (todoId: number, title:string) => void,
-  todoLoadingId: number[],
+  addComplitedTodo: (todoId:string) => void,
+  onTodoDelete: (id: string) => void,
+  onTodoChangingStatus: (todoId: string) => void,
+  onTodoChangingTitle: (todoId: string, title:string) => void,
+  todoLoadingId: string[],
   tempTodo: Todo | null,
 };
 
@@ -28,7 +28,7 @@ export const Main: React.FC<Props> = ({
         return (
           <TodoInfo
             todoInfo={todo}
-            key={todo.id}
+            key={todo._id}
             addComplitedTodo={addComplitedTodo}
             onTodoDelete={onTodoDelete}
             onTodoChangingStatus={onTodoChangingStatus}

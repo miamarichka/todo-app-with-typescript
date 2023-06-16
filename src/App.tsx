@@ -17,18 +17,18 @@ const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isError, setIsError] = useState(false);
   const [errorType, setErrorType] = useState<ErrorType>(ErrorType.ADD);
-  const [completedTodosId, setCompletedTodosId] = useState<number[]>([]);
+  const [completedTodosId, setCompletedTodosId] = useState<string[]>([]);
 
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [isResponse, setIsResponse] = useState(true);
-  const [todoLoadingId, setTodoLoadingId] = useState<number[]>([]);
+  const [todoLoadingId, setTodoLoadingId] = useState<string[]>([]);
   const [selectedOption, setSelectedOption]
     = useState<SelectOptions>(SelectOptions.ALL);
 
   const getCompletedTodosId = useCallback((allTodos: Todo[]) => () => {
     return allTodos
       .filter((todo: Todo) => todo.completed)
-      .map(todoItem => todoItem.id);
+      .map(todoItem => todoItem._id);
   }, []);
 
   const setOptionSelect = (type: SelectOptions) => {
@@ -38,9 +38,10 @@ const App: React.FC = () => {
   const loadTodosFromServer = useCallback(async () => {
     try {
       const todosData = await getTodos();
-
-      setTodos(todosData);
-      setCompletedTodosId(getCompletedTodosId(todosData));
+      if (todosData) {
+        setTodos(todosData);
+        setCompletedTodosId(getCompletedTodosId(todosData));
+      }
     } catch (err) {
       setIsError(true);
     }
@@ -52,7 +53,7 @@ const App: React.FC = () => {
 
   const emptyTodo = useCallback((title = '') => {
     const emptyNewTodo = {
-      id: 0,
+      _id: '0',
       title,
       completed: false,
     };
@@ -61,7 +62,7 @@ const App: React.FC = () => {
   }, []);
 
   const postTodoOnServer = useCallback(async (
-    todoToPost: Pick<Todo,  'title' | 'completed'>,
+    todoToPost: Pick<Todo, 'title' | 'completed'>,
   ) => {
     try {
       emptyTodo(todoToPost.title);
@@ -80,14 +81,15 @@ const App: React.FC = () => {
     }
   }, [emptyTodo]);
 
-  const deleteTodoFromServer = useCallback(async (todoId: number) => {
+  const deleteTodoFromServer = useCallback(async (todoId: string) => {
+
     try {
       setIsResponse(false);
       const deleteExistTodo = await deleteTodos(todoId);
 
       if (deleteExistTodo) {
         setTodos(prevState => {
-          return prevState.filter(todo => todo.id !== todoId);
+          return prevState.filter(todo => todo._id !== todoId);
         });
         setTodoLoadingId([]);
       }
@@ -115,8 +117,8 @@ const App: React.FC = () => {
     setIsError(false);
   };
 
-  const addComplitedTodo = (todoId:number) => {
-    const currentTodo = todos.find(todo => todo.id === todoId);
+  const addComplitedTodo = (todoId: string) => {
+    const currentTodo = todos.find(todo => todo._id === todoId);
 
     if (currentTodo) {
       if (!completedTodosId.includes(todoId)) {
@@ -129,10 +131,10 @@ const App: React.FC = () => {
     }
   };
 
-  const patchTodoStatusOnServer = async (todoId: number) => {
+  const patchTodoStatusOnServer = async (todoId: string) => {
     try {
       setIsResponse(false);
-      const currentTodo = todos.find(todo => todo.id === todoId);
+      const currentTodo = todos.find(todo => todo._id === todoId);
 
       if (currentTodo) {
         const newStatus = !currentTodo.completed;
@@ -145,7 +147,7 @@ const App: React.FC = () => {
           currentTodo.completed = newStatus;
           setTodos(prevState => (
             prevState.map(todo => (
-              todo.id === todoId
+              todo._id === todoId
                 ? currentTodo
                 : todo
             ))
@@ -161,12 +163,12 @@ const App: React.FC = () => {
     }
   };
 
-  const updateTodoStatus = (todoId: number) => {
+  const updateTodoStatus = (todoId: string) => {
     setTodoLoadingId([todoId]);
     patchTodoStatusOnServer(todoId);
   };
 
-  const addTodo = (todo: Pick<Todo, 'title' | 'completed' >) => {
+  const addTodo = (todo: Pick<Todo, 'title' | 'completed'>) => {
     if (!todo.title.trim()) {
       setErrorType(ErrorType.ADD);
       setIsError(true);
@@ -177,8 +179,8 @@ const App: React.FC = () => {
     postTodoOnServer(todo);
   };
 
-  const deleteTodo = (todoId: number) => {
-    const todoToDelete = todos.find(todo => todo.id === todoId);
+  const deleteTodo = (todoId: string) => {
+    const todoToDelete = todos.find(todo => todo._id === todoId);
 
     if (!todoToDelete) {
       setErrorType(ErrorType.DELETE);
@@ -212,19 +214,19 @@ const App: React.FC = () => {
 
   const onActiveToggle = async () => {
     if (isToggleAllActive) {
-      setTodoLoadingId(todos.map(todo => todo.id));
+      setTodoLoadingId(todos.map(todo => todo._id));
       await Promise.all(todos.map(
-        todo => patchTodoStatusOnServer(todo.id),
+        todo => patchTodoStatusOnServer(todo._id),
       ));
     }
   };
 
   const patchTodoTitleOnServer = async (
-    todoId: number, newTitle: string,
+    todoId: string, newTitle: string,
   ) => {
     try {
       setIsResponse(false);
-      const currentTodo = todos.find(todo => todo.id === todoId);
+      const currentTodo = todos.find(todo => todo._id === todoId);
 
       if (currentTodo) {
         const responce = await patchTodoTitle(todoId, {
@@ -235,7 +237,7 @@ const App: React.FC = () => {
           currentTodo.title = newTitle;
           setTodos(prevState => (
             prevState.map(todo => (
-              todo.id === todoId
+              todo._id === todoId
                 ? currentTodo
                 : todo
             ))
@@ -251,7 +253,7 @@ const App: React.FC = () => {
     }
   };
 
-  const updateTodoTitle = (todoId: number, title: string) => {
+  const updateTodoTitle = (todoId: string, title: string) => {
     setTodoLoadingId([todoId]);
     patchTodoTitleOnServer(todoId, title);
   };

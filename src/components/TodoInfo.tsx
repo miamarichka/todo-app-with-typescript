@@ -1,15 +1,14 @@
-/* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useState } from 'react';
 import { Todo } from '../types/Todo';
 import { ModalOverlay } from './ModalOverlay';
 
 type Props = {
   todoInfo: Todo,
-  addComplitedTodo: (todoId:number) => void,
-  onTodoDelete: (id: number) => void,
-  onTodoChangingStatus: (todoId: number) => void,
-  onTodoChangingTitle: (todoId: number, title:string) => void,
-  todoLoadingId: number[],
+  addComplitedTodo: (todoId:string) => void,
+  onTodoDelete: (id: string) => void,
+  onTodoChangingStatus: (todoId: string) => void,
+  onTodoChangingTitle: (todoId: string, title:string) => void,
+  todoLoadingId: string[],
 };
 
 export const TodoInfo: React.FC<Props> = ({
@@ -24,7 +23,7 @@ export const TodoInfo: React.FC<Props> = ({
   const [newTitle, setNewTitle] = useState(todoInfo.title);
 
   const {
-    id,
+    _id,
     title,
     completed,
   } = todoInfo;
@@ -41,7 +40,7 @@ export const TodoInfo: React.FC<Props> = ({
     }
 
     if (target.value.trim() === '') {
-      onTodoDelete(id);
+      onTodoDelete(_id);
     }
 
     setIsTodoEditing(false);
@@ -57,11 +56,11 @@ export const TodoInfo: React.FC<Props> = ({
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onTodoChangingTitle(id, newTitle);
+    onTodoChangingTitle(_id, newTitle);
     setIsTodoEditing(false);
   };
 
-  const isTodoLoading = id === 0 || todoLoadingId.includes(id);
+  const isTodoLoading = _id === '0' || todoLoadingId.includes(_id);
 
   return (
     <div className={`todo ${completed ? 'completed' : ''}`}>
@@ -72,8 +71,8 @@ export const TodoInfo: React.FC<Props> = ({
           data-cy="TodoStatus"
           checked={completed}
           onChange={() => {
-            onTodoChangingStatus(id);
-            addComplitedTodo(id);
+            onTodoChangingStatus(_id);
+            addComplitedTodo(_id);
           }}
         />
       </label>
@@ -101,7 +100,7 @@ export const TodoInfo: React.FC<Props> = ({
           <button
             type="button"
             className="todo__remove"
-            onClick={() => onTodoDelete(id)}
+            onClick={() => onTodoDelete(_id)}
           >
             ×
 

@@ -1,6 +1,6 @@
 # Todo List App
 
-This is a Todo List application built using React, Bulma, Sass, Vite, MockAPI. It allows users to create, manage, and track their tasks.
+This is a Todo List application built using React, Bulma, Sass, Vite, MongoDB, Express, Node.js. It allows users to create, manage, and track their tasks.
 
 # Features
 1. Add Todo: Users can add new tasks to their list.
@@ -10,7 +10,8 @@ This is a Todo List application built using React, Bulma, Sass, Vite, MockAPI. I
 5. Delete Todo: Users can delete tasks from their list.
 6. Clear completed: Users can clear all completed tasks from their list.
 7. Toggle all: Users can toggle the completion status of all tasks at once.
-8. Backend: The app stores the data on server MockAPI, so tasks are preserved even after page reloads.
+8. Backend: The app stores the data on MongoDB, connecting and managing via Express, Mongoose. Validated with Joi and Mongoose Schema, so tasks are preserved even after page reloads.
+9. Backend hosted on render.com.
 
 # Installation vs Usage
 1. Clone the repository:

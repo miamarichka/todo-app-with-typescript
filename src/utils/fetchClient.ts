@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const BASE_URL = 'https://647a48e3a455e257fa648f7f.mockapi.io';
+const BASE_URL = 'https://todo-backend-ogqc.onrender.com/api'
 
 function wait(delay: number) {
   return new Promise(resolve => {
@@ -8,7 +8,7 @@ function wait(delay: number) {
 }
 
 
-type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+type RequestMethod = 'GET' | 'POST' | 'PUT' |'PATCH' | 'DELETE';
 
 function request<T>(
   url: string,
@@ -36,8 +36,10 @@ function request<T>(
 }
 
 export const client = {
-  get: <T>() => request<T>('/todos'),
+  get: <T>() => request<{ data: T[][] }>('/todos'),
+  // get: <T>() => request<T>('/todos'),
   post: <T>(data: any) => request<T>('/todos','POST', data),
   put: <T>(url: string, data: any) => request<T>(url, 'PUT', data),
+  patch: <T>(url: string, data: any) => request<T>(url, 'PATCH', data),
   delete: (url: string) => request(url, 'DELETE'),
 };
