@@ -15,7 +15,7 @@ This is a TaskTamer application built using React, Bulma, Sass, Vite, MongoDB, E
 
 # Installation vs Usage
 1. Clone the repository:
-git clone https://github.com/miamarichka/todo-app-with-typescript.git
+git clone https://github.com/miamarichka/tasktimer.git
 2. Navigate to the project directory:
 cd phonebook-app
 3. Install the dependencies:
