@@ -1,6 +1,6 @@
-# Todo List App
+# TaskTamer
 
-This is a Todo List application built using React, Bulma, Sass, Vite, MongoDB, Express, Node.js. It allows users to create, manage, and track their tasks.
+This is a TaskTamer application built using React, Bulma, Sass, Vite, MongoDB, Express, Node.js. It allows users to create, manage, and track their tasks.
 
 # Features
 1. Add Todo: Users can add new tasks to their list.
